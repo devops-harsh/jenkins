@@ -3,4 +3,11 @@ node {
         sh ' echo "building project...." '
     }
 
+    stage ('Test') {
+        sh ' echo "Testing the project...." '
+    }
+
+    stage ('Deploy') {
+        sh ' echo "Deploying the project" '
+    }
 }
