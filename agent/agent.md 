@@ -1,0 +1,27 @@
+Master Node-
+
+1) create the worker ec2 instance as Master node
+2) install the jenkins on Master node
+3) create the public and private key
+   ssh-keygen -t rsa
+4) cat the id_rsa and id_rsa.pub 
+
+Agent Node- 
+1) login to the ec2 instance as agent node/ worker node
+2) add the private key of master (id_rsa) in the .ssh/autherized_keys
+3) install the same version of java in both worker and master
+4) change the permission of authorized_keys and .ssh file itself.
+
+Master Node - 
+
+1) ssh -i private_key ubuntu@ip of worker
+2) open jenkins-
+   1) setup the node name
+   2) setup remote directory where workspace and all needed file save in worker node
+   3) label the node
+   4) use the launch method as SSH 
+   5) choose host as public ip of agent
+   6) in Credentials paste the private key
+   7) check worker node is loged in via SSH in log of node
+   8) run the pipeline script with just agent {label 'worker-node-1"}
+

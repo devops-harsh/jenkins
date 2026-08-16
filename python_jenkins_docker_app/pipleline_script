@@ -1,0 +1,70 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('git clone') {
+            steps {
+                git branch: 'main', url: 'https://github.com/devops-harsh/jenkins.git'
+            }
+        }
+        
+        stage('compile') {
+            steps {
+                dir('python_jenkins_docker_app') {
+                     sh 'python3 -m py_compile app.py'
+                 }
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                dir('python_jenkins_docker_app') {
+                     sh 'python3 -m unittest discover tests'
+                 }
+            }
+        }
+        
+        stage('docker build') {
+            steps {
+                dir('python_jenkins_docker_app') {
+                     sh 'docker build -t python:latest .'
+                 }
+            }
+        }
+        
+        stage('docker run') {
+            steps {
+                dir('python_jenkins_docker_app') {
+                     sh 'docker run -d python:latest'
+                 }
+            }
+        }
+        
+        stage('docker tag and push') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'harsh2409', 
+                passwordVariable: 'DockerHubPassoword', 
+                usernameVariable: 'DockerHubUser')]) {
+                     sh ''' docker login -u "$DockerHubUser" -p  "$DockerHubPassoword"
+                            docker tag python:latest "$DockerHubUser"/python:latest 
+                            docker push "$DockerHubUser"/python:latest '''
+                  }
+            }
+        }
+    }   
+    
+   post {
+       always {
+           cleanWs()
+       }
+       success {
+           echo 'pipleline executed'
+       }
+       failure {
+           echo "pipeline got an error"
+       }
+   }
+        
+    }
+
+
