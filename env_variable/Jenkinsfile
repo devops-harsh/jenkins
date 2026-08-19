@@ -1,0 +1,105 @@
+// pipeline {
+//     agent any
+
+//     stages {
+//         stage('check') {
+//             steps { // this are the built in variables
+//                 sh ''' 
+//                 echo " build number of the job is: $BUILD_NUMBER "
+//                 echo " current job name is: $JOB_NAME "
+//                 echo " workspace name is: $WORKSPACE "
+//                 ''' 
+//             }
+//         }
+//     }
+// }
+
+
+// pipeline {
+//     agent any
+    
+//     environment {
+//         APP_NAME = "Env varibale use"
+//         TAG_VERSION = "v1.0.0"
+//         IMAGE = "harsh2409/python"
+//     }
+
+//     stages {
+//         stage('docker pull') {
+//             steps {
+//                    sh '''
+//                    echo " puling the docker image "
+//                    docker pull ${IMAGE}
+//                    echo "pulled the ${IMAGE}"
+//                    '''
+//             }
+//         }
+        
+//         stage("docker tag "){
+//             steps {
+//             withCredentials([usernamePassword(credentialsId: 'docker', 
+//                passwordVariable: 'DockerPassword', 
+//                usernameVariable: 'DockerUsername')]) {
+//             sh 'docker tag ${IMAGE} $DockerUsername/${APP_NAME}:${TAG_VERSION}'
+//           }
+//             }
+//         }
+        
+//         stage("docker push"){
+//             steps {
+//                 withCredentials([usernamePassword(credentialsId: 'docker', 
+//                passwordVariable: 'DockerPassword', 
+//                usernameVariable: 'DockerUsername')]) {
+//                sh 'docker push $DockerUsername/${APP_NAME}:${TAG_VERSION} '
+
+//             }
+//             }
+//         }
+//     }
+// }
+
+
+
+pipeline {
+    agent any
+    
+    environment {
+        APP_NAME = "env_var"
+        TAG_VERSION = "v1.0.1"
+        IMAGE = "harsh2409/python"
+        
+        DOCKER_CREDS = credentials('docker') // id of the credentilas need to give docker is ID here while creating the credentials.
+        
+        DockerUsername = "${DOCKER_CREDS_USR}"
+        DockerPassword = "${DOCKER_CREDS_PSW}"
+
+    }
+
+    stages {
+        stage('docker pull') {
+            steps {
+                   sh '''
+                   echo " puling the docker image "
+                   docker pull ${IMAGE}
+                   echo "pulled the ${IMAGE}"
+                   '''
+            }
+        }
+        
+        stage("docker tag "){
+            steps {
+               sh 'docker tag ${IMAGE} $DockerUsername/${APP_NAME}:${TAG_VERSION}'
+               }
+        }
+        
+        stage("docker push"){
+            steps {
+               sh 'docker login -u ${DockerUsername} -p ${DockerPassword}'
+               sh 'docker push $DockerUsername/${APP_NAME}:${TAG_VERSION} '
+            }
+        }
+    }
+}
+
+
+

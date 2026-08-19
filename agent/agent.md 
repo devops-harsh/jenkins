@@ -8,7 +8,7 @@ Master Node-
 
 Agent Node- 
 1) login to the ec2 instance as agent node/ worker node
-2) add the private key of master (id_rsa) in the .ssh/autherized_keys
+2) add the public key of master (id_rsa) in the .ssh/autherized_keys
 3) install the same version of java in both worker and master
 4) change the permission of authorized_keys and .ssh file itself.
 
