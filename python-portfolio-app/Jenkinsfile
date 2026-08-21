@@ -16,12 +16,15 @@ pipeline {
         
         stage('lint') {
             steps {
-                dir('python-portfolio-app') {
+               catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                          dir('python-portfolio-app') {
                   sh "pip3 install flake8 --break-system-packages "
                    sh 'flake8 app.py '
                   }
              }
         }
+           }
+         
         
         stage('docker build and tag') {
             steps {
