@@ -1,65 +1,95 @@
-
-from flask import Flask, render_template, url_for
+from flask import Flask, render_template
 
 app = Flask(__name__)
 
-# Channel + playlist IDs
-CHANNEL_URL = "https://www.youtube.com/shubhamgourtech"
-PLAYLISTS = {
-    "jenkins": {
-        "title": "🧩 Jenkins Playlist",
-        "list_id": "PLBr8obKbpkYvJEaPmrzhHhwx8uPj8WYbg",
-        "gradient": "linear-gradient(135deg, #ff0844 0%, #ffb199 100%)"
+
+SERVICES = {
+    "web": {
+        "name": "Web Server",
+        "status": "Operational",
+        "uptime": "99.99%"
     },
-    "docker": {
-        "title": "🐳 Docker Playlist",
-        "list_id": "PLBr8obKbpkYsFtSF1XY9rM_3LH8LKRwSw",
-        "gradient": "linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)"
+    "database": {
+        "name": "Database",
+        "status": "Operational",
+        "uptime": "99.97%"
     },
-    "github": {
-        "title": "💻 GitHub Playlist",
-        "list_id": "PLBr8obKbpkYt679NgO1KqZOoY_QYYLBl2",
-        "gradient": "linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%)"
+    "api": {
+        "name": "API Gateway",
+        "status": "Operational",
+        "uptime": "99.95%"
     },
-    "aws": {
-        "title": "☁️ AWS Playlist",
-        "list_id": "PLBr8obKbpkYtn5eIK3iTgiV7MSgFwO-tr",
-        "gradient": "linear-gradient(135deg, #f7971e 0%, #ffd200 100%)"
+    "storage": {
+        "name": "Object Storage",
+        "status": "Operational",
+        "uptime": "99.99%"
     }
 }
 
+
 @app.context_processor
 def inject_globals():
-    return {"CHANNEL_URL": CHANNEL_URL, "PLAYLISTS": PLAYLISTS}
+    return {
+        "SERVICES": SERVICES
+    }
+
 
 @app.route("/")
 def index():
-    # Build cards from PLAYLISTS
-    cards = [
-        {"key": k, "title": v["title"], "url": f"/{k}"}
-        for k, v in PLAYLISTS.items()
-    ]
-    return render_template("index.html", cards=cards)
+    return render_template("index.html")
 
-@app.route("/jenkins")
-def jenkins():
-    p = PLAYLISTS["jenkins"]
-    return render_template("playlist.html", title=p["title"], list_id=p["list_id"], gradient=p["gradient"])
 
-@app.route("/docker")
-def docker():
-    p = PLAYLISTS["docker"]
-    return render_template("playlist.html", title=p["title"], list_id=p["list_id"], gradient=p["gradient"])
+@app.route("/web")
+def web():
+    service = SERVICES["web"]
 
-@app.route("/github")
-def github():
-    p = PLAYLISTS["github"]
-    return render_template("playlist.html", title=p["title"], list_id=p["list_id"], gradient=p["gradient"])
+    return render_template(
+        "playlist.html",
+        title=service["name"],
+        status=service["status"],
+        uptime=service["uptime"]
+    )
 
-@app.route("/aws")
-def aws():
-    p = PLAYLISTS["aws"]
-    return render_template("playlist.html", title=p["title"], list_id=p["list_id"], gradient=p["gradient"])
+
+@app.route("/database")
+def database():
+    service = SERVICES["database"]
+
+    return render_template(
+        "playlist.html",
+        title=service["name"],
+        status=service["status"],
+        uptime=service["uptime"]
+    )
+
+
+@app.route("/api")
+def api():
+    service = SERVICES["api"]
+
+    return render_template(
+        "playlist.html",
+        title=service["name"],
+        status=service["status"],
+        uptime=service["uptime"]
+    )
+
+
+@app.route("/storage")
+def storage():
+    service = SERVICES["storage"]
+
+    return render_template(
+        "playlist.html",
+        title=service["name"],
+        status=service["status"],
+        uptime=service["uptime"]
+    )
+
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(
+        host="0.0.0.0",
+        port=5000,
+        debug=True
+    )
