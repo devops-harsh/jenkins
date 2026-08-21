@@ -2,7 +2,6 @@ from flask import Flask, render_template
 
 app = Flask(__name__)
 
-
 SERVICES = {
     "web": {
         "name": "Web Server",
@@ -25,13 +24,6 @@ SERVICES = {
         "uptime": "99.99%"
     }
 }
-
-
-@app.context_processor
-def inject_globals():
-    return {
-        "SERVICES": SERVICES
-    }
 
 
 @app.route("/")
@@ -93,3 +85,5 @@ if __name__ == "__main__":
         port=5000,
         debug=True
     )
+
+unused_variable = "lint-test"
