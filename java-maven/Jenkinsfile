@@ -81,42 +81,35 @@ pipeline {
         }
 
         stage('Docker') {
-            steps {
-                dir('java-maven') {
+         steps {
+           dir('java-maven') {
 
-                    sh '''
-                        echo "$DOCKER_CREDS_PSW" | docker login \
-                            -u "$DOCKER_CREDS_USR" \
-                            --password-stdin
-                    '''
-
-                    docker(
-                        "${DOCKER_CREDS_USR}",
-                        "maven",
-                        "${TAG}"
-                    )
-                }
-            }
-        }
-        stage('Docker Push') {
-            steps {
-                echo "Logging in to Docker..."
-
-                sh '''
-                    echo "$DOCKER_CREDS_PSW" | docker login \
+            sh '''
+                echo "$DOCKER_CREDS_PSW" | docker login \
                     -u "$DOCKER_CREDS_USR" \
                     --password-stdin
-                '''
+            '''
 
-                sh 'docker push ${IMAGE}'
+            docker(
+                "${DOCKER_CREDS_USR}",
+                "maven-jenkins-demo",
+                "${TAG}"
+            )
+             }
+          }
+       } 
+
+       stage('Docker Push') {
+           steps {
+             sh 'docker push ${IMAGE}'
             }
-        }
-        
-           stage('Docker run') {
-            steps {
-                echo "run in to Docker..."
+          }
 
-                sh 'docker run -d --name maven-demo-${BUILD_NUMBER} ${IMAGE}'
+       stage('Docker Run') {
+          steps {
+            echo "Running Docker container..."
+
+              sh 'docker run -d --name maven-demo-${BUILD_NUMBER} ${IMAGE}'
             }
         }
 
