@@ -1,0 +1,100 @@
+pipeline {
+  agent any
+
+  environment {
+     DOCKER_CREDS = credentials('docker') 
+     TAG = "v${env.BUILD_NUMBER}"
+     IMAGE = "${DOCKER_CREDS_USR}/maven-jenkins-demo:${TAG}"
+  }
+
+  stages {
+     
+     stage('checkout the code') {
+        steps {
+          echo 'Checking out....'
+          checkout scm
+         }
+      }
+     
+     stage('maven clean workspace') {
+      steps {
+         sh "mvn clean"
+      }
+     }
+
+     stage('maven build and compile') {
+      steps {
+         sh "mvn compile"
+      }
+     }
+
+     stage('maven build and compile') {
+      steps {
+         sh "mvn test"
+      }
+      post {
+        always{
+          script {
+            if (fileExists('target/surefire-reports')) {
+              echo "Publishing JUnit test results..."
+              junit 'target/surefire-reports/*.xml'
+            } else {
+              echo "No JUnit test report directory found — skipping test report publishing."
+            }
+          }
+        }
+      }
+     }
+
+     
+    stage('Package') {
+      steps {
+        echo "Packaging application into JAR..."
+        sh 'mvn package -DskipTests'
+      }
+      post {
+        success {
+          archiveArtifacts artifacts: 'target/*.jar', fingerprint: true // build artifacts
+        }
+      }
+    }
+
+
+    stage('Static Code Analysis (Optional)') {
+      steps {
+        echo "Running code analysis (Simulated)..."
+        sh 'echo "Code quality check passed "'
+      }
+    }
+
+
+    stage('Docker Build and tag'){
+      steps {
+        echo "Building docker image"
+        sh ' docker build -t maven:latest .'
+        sh ' docker tag maven:latest ${IMAGE}'
+      }
+    }
+
+    stage('Docker push'){
+      steps {
+        sh 'echo "login to docker" '
+        sh ' docker login -u ${DOCKER_CREDS_USR} -p ${DOCKER_CREDS_PSW}'
+        sh ' docker push ${IMAGE}'
+      }
+    }
+  }
+
+  post {
+    success {
+      echo "build ${env.BUILD_NUMBER} completed"
+    }
+    failure {
+      echo "build ${env.BUILD_NUMBER} failed"
+    }
+    always {
+      cleanWs()
+    }
+  }
+
+}
