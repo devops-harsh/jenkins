@@ -17,21 +17,27 @@ pipeline {
       }
      
      stage('maven clean workspace') {
-      steps {
-         sh "mvn clean"
+        dir('java-maven') {
+           steps {
+               sh "maven clean "
+           }
       }
      }
 
      stage('maven build and compile') {
-      steps {
+        dir('java-maven') {
+         steps {
          sh "mvn compile"
-      }
+         }
+       }
      }
 
      stage('maven test ') {
-      steps {
+      dir('java-maven') {
+         steps {
          sh "mvn test"
-      }
+         }
+       }
       post {
         always{
           script {
@@ -48,10 +54,12 @@ pipeline {
 
      
     stage('Package') {
-      steps {
-        echo "Packaging application into JAR..."
-        sh 'mvn package -DskipTests'
-      }
+      dir('java-maven') {
+         steps {
+            echo "Packaging application into JAR..."
+            sh 'mvn package -DskipTests'
+          }
+       }
       post {
         success {
           archiveArtifacts artifacts: 'target/*.jar', fingerprint: true // build artifacts
@@ -60,7 +68,7 @@ pipeline {
     }
 
 
-    stage('Static Code Analysis (Optional)') {
+    stage('Static Code Analysis') {
       steps {
         echo "Running code analysis (Simulated)..."
         sh 'echo "Code quality check passed "'
@@ -69,10 +77,12 @@ pipeline {
 
 
     stage('Docker Build and tag'){
-      steps {
+      dir('java-maven') {
+        steps {
         echo "Building docker image"
         sh ' docker build -t maven:latest .'
         sh ' docker tag maven:latest ${IMAGE}'
+      }
       }
     }
 
