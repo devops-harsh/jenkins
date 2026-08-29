@@ -102,6 +102,15 @@ pipeline {
                 sh 'docker push ${IMAGE}'
             }
         }
+        
+           stage('Docker run') {
+            steps {
+                echo "run in to Docker..."
+
+                sh 'docker run -d --name maven-demo-${BUILD_NUMBER} ${IMAGE}'
+            }
+        }
+
     }
 
     post {
