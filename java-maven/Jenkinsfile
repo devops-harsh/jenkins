@@ -79,16 +79,24 @@ pipeline {
             }
         }
 
-        stage('Docker Build and Tag') {
+        stage('Docker') {
             steps {
                 dir('java-maven') {
-                    echo "Building Docker image..."
-                    sh 'docker build -t maven:latest .'
-                    sh 'docker tag maven:latest ${IMAGE}'
+
+                    sh '''
+                        echo "$DOCKER_CREDS_PSW" | docker login \
+                            -u "$DOCKER_CREDS_USR" \
+                            --password-stdin
+                    '''
+
+                    docker(
+                        "${DOCKER_CREDS_USR}",
+                        "maven",
+                        "${TAG}"
+                    )
                 }
             }
         }
-
         stage('Docker Push') {
             steps {
                 echo "Logging in to Docker..."
